@@ -1,0 +1,7 @@
+vendor/
+_vendor-*
+*.exe
+ekyc-api
+main
+*.note
+Config.toml
