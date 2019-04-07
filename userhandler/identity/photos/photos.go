@@ -1,7 +1,6 @@
 package photos
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -40,7 +39,6 @@ func PhotoStructHandler(fieldname string, r *http.Request) (*PhotoStruct, multip
 // GenerateStructFromURL generate PhotoStruct data from image url
 func (currphoto *PhotoStruct) GenerateStructFromURL(urlImage string) error {
 	filename := path.Base(urlImage)
-	fmt.Println(filename)
 
 	resp, errGet := http.Get(urlImage)
 	if errGet != nil {
@@ -66,13 +64,13 @@ func (currphoto *PhotoStruct) GenerateStructFromURL(urlImage string) error {
 	fileInfo, _ := file.Stat()
 	fileBytes, _ := ioutil.ReadFile(pointdir)
 
-	newPhotoStruct := new(PhotoStruct)
-	newPhotoStruct.Data = fileBytes
-	newPhotoStruct.Name = fileInfo.Name()
-	newPhotoStruct.Size = fileInfo.Size()
+	pointerData := &currphoto.Data
+	pointerName := &currphoto.Name
+	pointerSize := &currphoto.Size
 
-	pointcurr := &currphoto
-	*pointcurr = newPhotoStruct
+	*pointerData = fileBytes
+	*pointerName = fileInfo.Name()
+	*pointerSize = fileInfo.Size()
 
 	return nil
 }
