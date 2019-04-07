@@ -1,9 +1,14 @@
 package photos
 
 import (
+	"fmt"
+	"io"
 	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/http"
+	"os"
+	"path"
 )
 
 // PhotoStruct standart Struct for image
@@ -30,4 +35,44 @@ func PhotoStructHandler(fieldname string, r *http.Request) (*PhotoStruct, multip
 	newPhotoStruct.Size = handler.Size
 
 	return newPhotoStruct, file, nil
+}
+
+// GenerateStructFromURL generate PhotoStruct data from image url
+func (currphoto *PhotoStruct) GenerateStructFromURL(urlImage string) error {
+	filename := path.Base(urlImage)
+	fmt.Println(filename)
+
+	resp, errGet := http.Get(urlImage)
+	if errGet != nil {
+		log.Println("http error get from" + urlImage)
+		return errGet
+	}
+	defer resp.Body.Close()
+
+	pointdir := "/tmp/" + filename
+	file, errCreate := os.Create(pointdir)
+	if errCreate != nil {
+		log.Println("os error create file " + urlImage)
+		return errCreate
+	}
+	defer file.Close()
+
+	_, errCopy := io.Copy(file, resp.Body)
+	if errCopy != nil {
+		log.Println("io error copy resp.Body to " + urlImage)
+		log.Fatal(errCopy)
+	}
+
+	fileInfo, _ := file.Stat()
+	fileBytes, _ := ioutil.ReadFile(pointdir)
+
+	newPhotoStruct := new(PhotoStruct)
+	newPhotoStruct.Data = fileBytes
+	newPhotoStruct.Name = fileInfo.Name()
+	newPhotoStruct.Size = fileInfo.Size()
+
+	pointcurr := &currphoto
+	*pointcurr = newPhotoStruct
+
+	return nil
 }
