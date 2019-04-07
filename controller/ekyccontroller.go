@@ -8,7 +8,6 @@ import (
 	"github.com/adhityasan/ekyc-api/userhandler/identity"
 
 	"github.com/adhityasan/ekyc-api/imagehandler"
-	"github.com/adhityasan/ekyc-api/userhandler/identity/assigner"
 	"github.com/adhityasan/ekyc-api/userhandler/identity/photos"
 	"github.com/adhityasan/ekyc-api/userhandler/ocr"
 )
@@ -36,24 +35,10 @@ func Ocr(response http.ResponseWriter, request *http.Request) {
 	imgChan := make(chan interface{})
 	imageStruct, _, err := photos.PhotoStructHandler("OCR_IMAGE", request)
 	if err != nil {
+		response.WriteHeader(http.StatusInternalServerError)
 		response.Write(writeResponseByte(err.Error(), nil))
 		return
 	}
-
-	// NOT WORKING ON PNG
-	// img, _ := jpeg.Decode(fileReader)
-	// g := gift.New(
-	// 	gift.Contrast(20),
-	// 	gift.Grayscale(),
-	// )
-	// bounded := img.Bounds()
-	// fmt.Println(bounded)
-	// gbound := g.Bounds(bounded)
-	// imgEnhance := image.NewRGBA(gbound)
-	// fmt.Println(imageStruct, "DSISNSISNISISNINSINS")
-	// g.Draw(imgEnhance, img)
-	// bufKTP := bytes.NewBuffer(nil)
-	// err = jpeg.Encode(bufKTP, imgEnhance, nil)
 
 	adapter := &imagehandler.AwsAdapter{}
 	go adapter.Read(imageStruct.Data, imgChan)
@@ -66,6 +51,9 @@ func Ocr(response http.ResponseWriter, request *http.Request) {
 	errsave := ocrreq.Save()
 	if errsave != nil {
 		log.Println(errsave)
+		response.WriteHeader(http.StatusInternalServerError)
+		response.Write(writeResponseByte(errsave.Error(), nil))
+		return
 	}
 
 	var customData ocr.CustomResponse
@@ -79,27 +67,30 @@ func Ocr(response http.ResponseWriter, request *http.Request) {
 
 // Register to assign new fake data to Pii collection
 func Register(response http.ResponseWriter, request *http.Request) {
-}
 
-// AssignFakeIdentity to assign new fake data to Pii collection
-func AssignFakeIdentity(response http.ResponseWriter, request *http.Request) {
+	userIdentity, _ := identity.DecodeFormPost(request)
+	isExistLoc, _ := userIdentity.Exist()
+	var message string
 
-	var identity identity.Identity
-
-	json.NewDecoder(request.Body).Decode(&identity)
-	err := assigner.Assigner(identity.Nik, &identity)
-	if err != nil {
-		log.Println(err)
-		response.Write(writeRespByte(err.Error(), identity.Nik))
-		return
+	if isExistLoc {
+		errgrep := userIdentity.GrepData()
+		message = "KYC databases"
+		if errgrep != nil {
+			log.Println(errgrep)
+			response.WriteHeader(http.StatusInternalServerError)
+			response.Write(writeResponseByte(errgrep.Error(), userIdentity.Nik))
+			return
+		}
+	} else {
+		errgrep := userIdentity.GrepDataFromDukcapil()
+		message = "Dukcapil databases"
+		if errgrep != nil {
+			log.Println(errgrep)
+			response.WriteHeader(http.StatusInternalServerError)
+			response.Write(writeResponseByte(errgrep.Error(), userIdentity.Nik))
+			return
+		}
 	}
 
-	errSave := identity.Save()
-	if errSave != nil {
-		log.Println(errSave)
-		response.Write(writeRespByte(errSave.Error(), identity))
-		return
-	}
-
-	response.Write(writeRespByte("", identity))
+	response.Write(writeResponseByte(message, userIdentity))
 }
