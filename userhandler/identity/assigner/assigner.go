@@ -11,8 +11,8 @@ import (
 	"github.com/adhityasan/ekyc-api/userhandler/identity"
 )
 
-// Assigner Assign data from dukcapil into local
-func Assigner(nik string, identity *identity.Identity) error {
+// DukcapilSimulatorAssigner Assign data from dukcapil into local
+func DukcapilSimulatorAssigner(nik string, identity *identity.Identity) error {
 	requstBody, err := json.Marshal(map[string]string{
 		"NIK": nik,
 	})
@@ -30,11 +30,11 @@ func Assigner(nik string, identity *identity.Identity) error {
 	if errDo != nil {
 		return err
 	}
+	defer resp.Body.Close()
+
 	if resp.StatusCode != 200 {
 		return errors.New("Fail generate fake identity. Bad request")
 	}
-
-	defer resp.Body.Close()
 
 	var decoded struct {
 		Content []interface{}
