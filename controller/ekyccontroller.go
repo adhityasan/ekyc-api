@@ -90,7 +90,7 @@ func AssignFakeIdentity(response http.ResponseWriter, request *http.Request) {
 	err := assigner.Assigner(identity.Nik, &identity)
 	if err != nil {
 		log.Println(err)
-		response.Write(writeRespByte(err.Error(), identity))
+		response.Write(writeRespByte(err.Error(), identity.Nik))
 		return
 	}
 
