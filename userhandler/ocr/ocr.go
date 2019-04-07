@@ -1,17 +1,14 @@
 package ocr
 
 import (
-	"context"
 	"crypto/rand"
 	"fmt"
-	"log"
-	"time"
+
+	"github.com/adhityasan/ekyc-api/db"
 
 	"github.com/adhityasan/ekyc-api/config"
 	"github.com/adhityasan/ekyc-api/userhandler/identity/photos"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var dbhost = config.Of.Mongo.Host
@@ -37,18 +34,6 @@ type CustomResponse struct {
 	OcrResult interface{}        `json:"ocr_result,omitempty" bson:"ocr_result,omitempty"`
 }
 
-func openCollection() (context.Context, context.CancelFunc, *mongo.Client, *mongo.Collection, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(dburl))
-	collection := client.Database(dbname).Collection(dbcoll)
-
-	if err != nil {
-		log.Println(err)
-	}
-
-	return ctx, cancel, client, collection, err
-}
-
 // GenerateToken genereate random string into RequestTOken
 func (r *Request) GenerateToken() {
 	b := make([]byte, 8)
@@ -59,7 +44,7 @@ func (r *Request) GenerateToken() {
 
 // Save save Request struct into datarequest collection
 func (r *Request) Save() error {
-	ctx, cancel, _, collection, err := openCollection()
+	ctx, cancel, _, collection, err := db.OpenConnection(10, dburl, dbname, dbcoll)
 
 	res, err := collection.InsertOne(ctx, r)
 	defer cancel()
