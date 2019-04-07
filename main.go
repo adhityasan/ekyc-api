@@ -37,7 +37,7 @@ func main() {
 	r.HandleFunc("/go/aisatsu", controller.Aisatsu).Methods("GET")
 	r.HandleFunc("/doocr", controller.DoOCR).Methods("POST")
 	r.HandleFunc("/ocr", controller.Ocr).Methods("POST")
-	r.HandleFunc("/assignfakepii", controller.AssignFakePii).Methods("POST")
+	r.HandleFunc("/assignfakeidentity", controller.AssignFakeIdentity).Methods("POST")
 
 	// Start Server
 	go func() {
