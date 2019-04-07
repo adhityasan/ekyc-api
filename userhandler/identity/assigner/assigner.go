@@ -1,4 +1,4 @@
-package piiassigner
+package assigner
 
 import (
 	"bytes"
@@ -7,11 +7,11 @@ import (
 	"net/http"
 
 	"github.com/adhityasan/ekyc-api/config"
-	"github.com/adhityasan/ekyc-api/pii"
+	"github.com/adhityasan/ekyc-api/userhandler/identity"
 )
 
-// Assigner asdasdasd
-func Assigner(nik string, piitostore *pii.Pii) error {
+// Assigner Assign data from dukcapil into local
+func Assigner(nik string, identity *identity.Identity) error {
 	requstBody, err := json.Marshal(map[string]string{
 		"NIK": nik,
 	})
@@ -47,7 +47,7 @@ func Assigner(nik string, piitostore *pii.Pii) error {
 		log.Println(errMarshalContent)
 	}
 
-	json.Unmarshal(thecontents, &piitostore)
+	json.Unmarshal(thecontents, &identity)
 
 	return nil
 }

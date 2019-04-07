@@ -14,5 +14,4 @@ type Support struct {
 	FotoKTP       *photos.PhotoStruct `schema:"FOTO_KTP" bson:"foto_ktp,omitempty" json:"FOTO_KTP,omitempty"`
 	FotoSelfie    *photos.PhotoStruct `schema:"FOTO_SELFIE" bson:"foto_selfie,omitempty" json:"FOTO_SELFIE,omitempty"`
 	FotoSelfieKTP *photos.PhotoStruct `schema:"FOTO_SELFIE_KTP" bson:"foto_selfie_ktp,omitempty" json:"FOTO_SELFIE_KTP,omitempty"`
-	PasfotoKTP    *photos.PhotoStruct `schema:"PASFOTO_KTP,omitempty" bson:"pasfoto_ktp,omitempty" json:"PASFOTO_KTP,omitempty"`
 }

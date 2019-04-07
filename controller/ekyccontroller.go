@@ -5,11 +5,12 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/adhityasan/ekyc-api/userhandler/ocr"
-
-	"github.com/adhityasan/ekyc-api/userhandler/identity/photos"
+	"github.com/adhityasan/ekyc-api/userhandler/identity"
 
 	"github.com/adhityasan/ekyc-api/imagehandler"
+	"github.com/adhityasan/ekyc-api/userhandler/identity/assigner"
+	"github.com/adhityasan/ekyc-api/userhandler/identity/photos"
+	"github.com/adhityasan/ekyc-api/userhandler/ocr"
 )
 
 type controllerResponse struct {
@@ -74,4 +75,31 @@ func Ocr(response http.ResponseWriter, request *http.Request) {
 
 	response.Header().Set("Ocrtoken", ocrreq.Token)
 	response.Write(writeResponseByte("", customData))
+}
+
+// Register to assign new fake data to Pii collection
+func Register(response http.ResponseWriter, request *http.Request) {
+}
+
+// AssignFakeIdentity to assign new fake data to Pii collection
+func AssignFakeIdentity(response http.ResponseWriter, request *http.Request) {
+
+	var identity identity.Identity
+
+	json.NewDecoder(request.Body).Decode(&identity)
+	err := assigner.Assigner(identity.Nik, &identity)
+	if err != nil {
+		log.Println(err)
+		response.Write(writeRespByte(err.Error(), identity))
+		return
+	}
+
+	errSave := identity.Save()
+	if errSave != nil {
+		log.Println(errSave)
+		response.Write(writeRespByte(errSave.Error(), identity))
+		return
+	}
+
+	response.Write(writeRespByte("", identity))
 }
