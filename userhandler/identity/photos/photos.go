@@ -2,6 +2,7 @@ package photos
 
 import (
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"net/textproto"
 )
@@ -15,11 +16,11 @@ type PhotoStruct struct {
 }
 
 // PhotoStructHandler create image Struct with Data , Name, Size, Header from a request
-func PhotoStructHandler(fieldname string, r *http.Request) (*PhotoStruct, error) {
+func PhotoStructHandler(fieldname string, r *http.Request) (*PhotoStruct, multipart.File, error) {
 	file, handler, err := r.FormFile(fieldname)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	defer file.Close()
@@ -31,5 +32,5 @@ func PhotoStructHandler(fieldname string, r *http.Request) (*PhotoStruct, error)
 	newPhotoStruct.Size = handler.Size
 	newPhotoStruct.Header = handler.Header
 
-	return newPhotoStruct, nil
+	return newPhotoStruct, file, nil
 }
