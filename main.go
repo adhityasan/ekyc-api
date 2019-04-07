@@ -33,16 +33,12 @@ func main() {
 	}
 
 	// Define Routes
-	r.HandleFunc("/identify", controller.Identify).Methods("POST")
-	r.HandleFunc("/identifyazure", controller.IdentifyByAzure).Methods("POST")
-	r.HandleFunc("/go/aisatsu", controller.Aisatsu).Methods("GET")
-	r.HandleFunc("/doocr", controller.DoOCR).Methods("POST")
-
 	r.HandleFunc("/ocr", controller.Ocr).Methods("POST")
 	r.HandleFunc("/register", controller.Register).Methods("POST")
 
 	r.HandleFunc("/assignfakeidentity", unittest.AssignFakeIdentity).Methods("POST")
 	r.HandleFunc("/grepdata", unittest.GrepData).Methods("POST")
+	r.HandleFunc("/go/aisatsu", controller.Aisatsu).Methods("GET")
 
 	// Start Server
 	go func() {
