@@ -47,6 +47,12 @@ type Identity struct {
 	SupportID        primitive.ObjectID  `schema:"SUPPORT_ID,omitempty" bson:"support_id,omitempty" json:"SUPPORT_ID,omitempty"`
 }
 
+// Validate validate current identity data
+func (identity *Identity) Validate() bool {
+	nikmatch, _ := regexp.MatchString("^(11|12|13|14|15|16|17|18|19|21|31|32|33|34|35|36|51|52|53|61|62|63|64|65|71|72|73|74|75|76|81|82|91|92)(0[^0]|[^0][0-9]){2}([04][^0]|[1256][0-9]|[37][01])(0[1-9]|1[012])[0-9]{2}([0-9]{0,3}[^0][0-9]{0,3})$", identity.Nik)
+	return nikmatch
+}
+
 // Save Save identity to mongo dataidentity collection
 func (identity *Identity) Save() error {
 
