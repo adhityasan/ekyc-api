@@ -3,6 +3,7 @@ package assigner
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 
@@ -27,8 +28,10 @@ func Assigner(nik string, identity *identity.Identity) error {
 
 	resp, errDo := client.Do(req)
 	if errDo != nil {
-		log.Fatalln(err)
 		return err
+	}
+	if resp.StatusCode != 200 {
+		return errors.New("Fail generate fake identity. Bad request")
 	}
 
 	defer resp.Body.Close()
