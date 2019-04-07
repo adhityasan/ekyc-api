@@ -12,7 +12,6 @@ import (
 
 	"github.com/adhityasan/ekyc-api/imagehandler"
 	"github.com/adhityasan/ekyc-api/pii"
-	"github.com/adhityasan/ekyc-api/pii/assigner"
 	"github.com/disintegration/gift"
 )
 
@@ -169,24 +168,24 @@ func DoOCR(w http.ResponseWriter, r *http.Request) {
 }
 
 // AssignFakePii to assign new fake data to Pii collection
-func AssignFakePii(response http.ResponseWriter, request *http.Request) {
+// func AssignFakePii(response http.ResponseWriter, request *http.Request) {
 
-	var person pii.Pii
+// 	var person pii.Pii
 
-	json.NewDecoder(request.Body).Decode(&person)
-	err := assigner.Assigner(person.Nik, &person)
-	if err != nil {
-		log.Println(err)
-		response.Write(writeRespByte(err.Error(), person))
-		return
-	}
+// 	json.NewDecoder(request.Body).Decode(&person)
+// 	err := assigner.Assigner(person.Nik, &person)
+// 	if err != nil {
+// 		log.Println(err)
+// 		response.Write(writeRespByte(err.Error(), person))
+// 		return
+// 	}
 
-	_, errSave := person.Save()
-	if errSave != nil {
-		log.Println(errSave)
-		response.Write(writeRespByte(errSave.Error(), person))
-		return
-	}
+// 	_, errSave := person.Save()
+// 	if errSave != nil {
+// 		log.Println(errSave)
+// 		response.Write(writeRespByte(errSave.Error(), person))
+// 		return
+// 	}
 
-	response.Write(writeRespByte("", person))
-}
+// 	response.Write(writeRespByte("", person))
+// }
