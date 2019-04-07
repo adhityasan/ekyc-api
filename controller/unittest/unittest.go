@@ -5,8 +5,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/adhityasan/ekyc-api/userhandler/identity"
 	"github.com/adhityasan/ekyc-api/userhandler/identity/assigner"
+	"github.com/adhityasan/ekyc-api/userhandler/identity/photos"
+
+	"github.com/adhityasan/ekyc-api/userhandler/identity"
 )
 
 type controllerResponse struct {
@@ -48,13 +50,37 @@ func AssignFakeIdentity(response http.ResponseWriter, request *http.Request) {
 
 	case "application/json":
 
-		json.NewDecoder(request.Body).Decode(&userIdentity)
-		err := assigner.DukcapilSimulatorAssigner(userIdentity.Nik, &userIdentity)
-		if err != nil {
-			log.Println(err)
-			response.Write(writeResponseByte(err.Error(), userIdentity.Nik))
+		type reqjsonstruct struct {
+			Nik  string `json:"NIK,omitempty"`
+			Foto string `json:"FOTO,omitempty"`
+		}
+
+		var formjson reqjsonstruct
+		errDecode := json.NewDecoder(request.Body).Decode(&formjson)
+		if errDecode != nil {
+			log.Println(errDecode)
+			response.WriteHeader(http.StatusBadRequest)
+			response.Write(writeResponseByte(errDecode.Error(), formjson.Nik))
 			return
 		}
+
+		errGenerateFromDukcapil := assigner.DukcapilSimulatorAssigner(formjson.Nik, &userIdentity)
+		if errGenerateFromDukcapil != nil {
+			log.Println(errGenerateFromDukcapil)
+			response.WriteHeader(http.StatusBadRequest)
+			response.Write(writeResponseByte(errGenerateFromDukcapil.Error(), formjson.Nik))
+			return
+		}
+
+		var fotostruct photos.PhotoStruct
+		errGeneratePhotoStruct := fotostruct.GenerateStructFromURL(formjson.Foto)
+		if errGeneratePhotoStruct != nil {
+			log.Println(errGeneratePhotoStruct)
+			response.WriteHeader(http.StatusBadRequest)
+			response.Write(writeResponseByte(errGeneratePhotoStruct.Error(), formjson.Nik))
+			return
+		}
+		userIdentity.Foto = &fotostruct
 
 	default:
 
