@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -44,7 +43,7 @@ type Identity struct {
 	Pekerjaan        string              `schema:"PEKERJAAN,omitempty" bson:"pekerjaan,omitempty" json:"PEKERJAAN,omitempty"`
 	JenisKelamin     string              `schema:"JENIS_KELAMIN,omitempty" bson:"jenis_kelamin,omitempty" json:"JENIS_KELAMIN,omitempty"`
 	StatusPerkawinan string              `schema:"STATUS_PERKAWINAN,omitempty" bson:"status_perkawinan,omitempty" json:"STATUS_PERKAWINAN,omitempty"`
-	Foto             *photos.PhotoStruct `schema:"FOTO,omitempty" bson:"foto,omitempty" json:"FOTO,omitempty"`
+	Foto             *photos.PhotoStruct `schema:"FOTO,omitempty" bson:"foto,omitempty" json:"-"`
 	SupportID        primitive.ObjectID  `schema:"SUPPORT_ID,omitempty" bson:"support_id,omitempty" json:"SUPPORT_ID,omitempty"`
 }
 
@@ -112,7 +111,6 @@ func (identity *Identity) Exist() (bool, error) {
 	defer cancel()
 
 	if errfind != nil {
-		log.Println(errfind)
 		return false, errfind
 	}
 
