@@ -24,7 +24,7 @@ var dbcoll = config.Of.DBModules["identity"].Coll
 
 // Identity struct for modeling Identity in mongo collection
 type Identity struct {
-	ID               primitive.ObjectID  `bson:"_id,omitempty" json:"_id,omitempty"`
+	ID               primitive.ObjectID  `bson:"_id,omitempty" json:"ID,omitempty"`
 	Nik              string              `schema:"NIK,omitempty" bson:"nik,omitempty" json:"NIK,omitempty"`
 	EktpStatus       bool                `schema:"EKTP_STATUS,omitempty" bson:"ektp_status,omitempty" json:"EKTP_STATUS,omitempty"`
 	NamaLengkap      string              `schema:"NAMA_LENGKAP,omitempty" bson:"nama_lengkap,omitempty" json:"NAMA_LENGKAP,omitempty"`
@@ -53,7 +53,7 @@ func (identity *Identity) Save() error {
 
 	exist, _ := identity.Exist()
 	if exist {
-		return errors.New("Pii data exist, Pii.ID has been set")
+		return errors.New("Identity data exist, Identity.ID has been set")
 	}
 
 	ctx, cancel, _, collection, err := db.OpenConnection(10, dburl, dbname, dbcoll)
