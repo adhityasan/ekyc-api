@@ -5,10 +5,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/adhityasan/ekyc-api/userhandler/identity"
 	"github.com/adhityasan/ekyc-api/userhandler/identity/assigner"
 	"github.com/adhityasan/ekyc-api/userhandler/identity/photos"
-
-	"github.com/adhityasan/ekyc-api/userhandler/identity"
 )
 
 type controllerResponse struct {
