@@ -48,7 +48,7 @@ type Identity struct {
 	JenisKelamin     string              `schema:"JENIS_KELAMIN,omitempty" bson:"jenis_kelamin,omitempty" json:"JENIS_KELAMIN,omitempty"`
 	StatusPerkawinan string              `schema:"STATUS_PERKAWINAN,omitempty" bson:"status_perkawinan,omitempty" json:"STATUS_PERKAWINAN,omitempty"`
 	Foto             *photos.PhotoStruct `schema:"FOTO,omitempty" bson:"foto,omitempty" json:"-"`
-	SupportID        primitive.ObjectID  `schema:"SUPPORT_ID,omitempty" bson:"support_id,omitempty" json:"SUPPORT_ID,omitempty"`
+	SupportID        primitive.ObjectID  `schema:"SUPPORT_ID,omitempty" bson:"support_id,omitempty" json:"-"`
 }
 
 // Validate validate current identity data
