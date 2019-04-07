@@ -35,7 +35,8 @@ func main() {
 	r.HandleFunc("/identify", controller.Identify).Methods("POST")
 	r.HandleFunc("/identifyazure", controller.IdentifyByAzure).Methods("POST")
 	r.HandleFunc("/go/aisatsu", controller.Aisatsu).Methods("GET")
-	r.HandleFunc("/ocr", controller.DoOCR).Methods("POST")
+	r.HandleFunc("/doocr", controller.DoOCR).Methods("POST")
+	r.HandleFunc("/ocr", controller.Ocr).Methods("POST")
 	r.HandleFunc("/assignfakepii", controller.AssignFakePii).Methods("POST")
 
 	// Start Server
