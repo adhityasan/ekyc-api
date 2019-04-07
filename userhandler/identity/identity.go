@@ -1,10 +1,14 @@
 package identity
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/adhityasan/ekyc-api/config"
@@ -124,4 +128,67 @@ func (identity *Identity) Exist() (bool, error) {
 	*pointerID = decodepoint.ID
 
 	return true, nil
+}
+
+// GrepData grep all current identity data by its ID From Local Database
+func (identity *Identity) GrepData() error {
+	_, cancel, _, collection, errconn := db.OpenConnection(10, dburl, dbname, dbcoll)
+	if errconn != nil {
+		return errconn
+	}
+
+	errfind := collection.FindOne(context.TODO(), bson.M{"_id": identity.ID}).Decode(&identity)
+	if errfind != nil {
+		return errfind
+	}
+	defer cancel()
+
+	return nil
+}
+
+// GrepDataFromDukcapil  grep all current identity data by its ID From Dukcapil
+func (identity *Identity) GrepDataFromDukcapil() error {
+	requstBody, err := json.Marshal(map[string]string{
+		"NIK": identity.Nik,
+	})
+
+	req, err := http.NewRequest("POST", config.Of.Dukcapil.Endpoint, bytes.NewBuffer(requstBody))
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+
+	resp, errDo := client.Do(req)
+	if errDo != nil {
+		log.Println("errDo", errDo)
+		return err
+	}
+	if resp.StatusCode != 200 {
+		return errors.New("Fail generate fake identity. Bad request")
+	}
+
+	defer resp.Body.Close()
+
+	var decoded struct {
+		Content []interface{}
+	}
+
+	errDecode := json.NewDecoder(resp.Body).Decode(&decoded)
+	if errDecode != nil {
+		log.Println("errdecode", errDecode)
+		return errDecode
+	}
+
+	thecontents, errMarshalContent := json.Marshal(decoded.Content[0])
+	if errMarshalContent != nil {
+		log.Println("errMarshalContent", errMarshalContent)
+		return errMarshalContent
+	}
+
+	json.Unmarshal(thecontents, &identity)
+
+	return nil
 }
