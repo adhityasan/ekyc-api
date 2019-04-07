@@ -1,8 +1,10 @@
 package identity
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -10,6 +12,7 @@ import (
 	"github.com/adhityasan/ekyc-api/db"
 	"github.com/adhityasan/ekyc-api/userhandler/identity/photos"
 	"github.com/gorilla/schema"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -47,8 +50,13 @@ type Identity struct {
 
 // Save Save identity to mongo dataidentity collection
 func (identity *Identity) Save() error {
-	ctx, cancel, _, collection, err := db.OpenConnection(10, dburl, dbname, dbcoll)
 
+	exist, _ := identity.Exist()
+	if exist {
+		return errors.New("Pii data exist, Pii.ID has been set")
+	}
+
+	ctx, cancel, _, collection, err := db.OpenConnection(10, dburl, dbname, dbcoll)
 	res, err := collection.InsertOne(ctx, identity)
 	defer cancel()
 	if err != nil {
@@ -90,4 +98,26 @@ func DecodeFormPost(request *http.Request) (*Identity, error) {
 	newIdentity.Foto, _, err = photos.PhotoStructHandler("FOTO", request)
 
 	return newIdentity, nil
+}
+
+// Exist Check Pii data existance in local database
+func (identity *Identity) Exist() (bool, error) {
+	_, cancel, _, collection, errconn := db.OpenConnection(10, dburl, dbname, dbcoll)
+	if errconn != nil {
+		return false, errconn
+	}
+
+	decodepoint := new(Identity)
+	errfind := collection.FindOne(context.TODO(), bson.M{"nik": identity.Nik}).Decode(decodepoint)
+	defer cancel()
+
+	if errfind != nil {
+		log.Println(errfind)
+		return false, errfind
+	}
+
+	pointerID := &identity.ID
+	*pointerID = decodepoint.ID
+
+	return true, nil
 }
