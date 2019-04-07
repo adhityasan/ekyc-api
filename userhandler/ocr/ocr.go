@@ -34,24 +34,24 @@ type CustomResponse struct {
 }
 
 // GenerateToken genereate random string into RequestTOken
-func (r *Request) GenerateToken() {
+func (ocrreq *Request) GenerateToken() {
 	b := make([]byte, 12)
 	rand.Read(b)
-	token := &r.Token
+	token := &ocrreq.Token
 	*token = fmt.Sprintf("%x", b)
 }
 
 // Save save Request struct into datarequest collection
-func (r *Request) Save() error {
+func (ocrreq *Request) Save() error {
 	ctx, cancel, _, collection, err := db.OpenConnection(10, dburl, dbname, dbcoll)
 
-	res, err := collection.InsertOne(ctx, r)
+	res, err := collection.InsertOne(ctx, ocrreq)
 	defer cancel()
 	if err != nil {
 		return err
 	}
 
-	newid := &r.ID
+	newid := &ocrreq.ID
 	*newid = res.InsertedID.(primitive.ObjectID)
 
 	return nil
