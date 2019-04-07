@@ -4,9 +4,8 @@ import (
 	"crypto/rand"
 	"fmt"
 
-	"github.com/adhityasan/ekyc-api/db"
-
 	"github.com/adhityasan/ekyc-api/config"
+	"github.com/adhityasan/ekyc-api/db"
 	"github.com/adhityasan/ekyc-api/userhandler/identity/photos"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -36,7 +35,7 @@ type CustomResponse struct {
 
 // GenerateToken genereate random string into RequestTOken
 func (r *Request) GenerateToken() {
-	b := make([]byte, 8)
+	b := make([]byte, 12)
 	rand.Read(b)
 	token := &r.Token
 	*token = fmt.Sprintf("%x", b)
