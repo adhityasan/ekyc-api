@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"regexp"
 
 	"github.com/adhityasan/ekyc-api/userhandler/identity"
 	"github.com/adhityasan/ekyc-api/userhandler/identity/assigner"
@@ -30,11 +31,16 @@ func writeResponseByte(msg string, data interface{}) []byte {
 // AssignFakeIdentity to assign new fake data to Identity collection
 func AssignFakeIdentity(response http.ResponseWriter, request *http.Request) {
 
-	var userIdentity identity.Identity
+	var data interface{}
 	var message string
 	contentType := request.Header.Get("Content-Type")
+	ismfd, _ := regexp.MatchString("^multipart/form-data", contentType)
+	if ismfd {
+		contentType = "multipart/form-data"
+	}
 
 	switch contentType {
+
 	case "multipart/form-data":
 
 		message = "Data assigned from requests formData"
@@ -45,9 +51,20 @@ func AssignFakeIdentity(response http.ResponseWriter, request *http.Request) {
 			userIdentity.GrepData()
 			message = "data based on NIK:" + userIdentity.Nik + " already exists"
 			response.WriteHeader(http.StatusBadRequest)
+			response.Write(writeResponseByte(message, userIdentity))
+			return
 		}
+		errSave := userIdentity.Save()
+		if errSave != nil {
+			log.Println(errSave)
+			response.Write(writeResponseByte(errSave.Error(), userIdentity))
+			return
+		}
+		data = userIdentity
 
 	case "application/json":
+
+		var userIdentity identity.Identity
 
 		type reqjsonstruct struct {
 			Nik  string `json:"NIK,omitempty"`
@@ -64,6 +81,7 @@ func AssignFakeIdentity(response http.ResponseWriter, request *http.Request) {
 		}
 
 		errGenerateFromDukcapil := assigner.DukcapilSimulatorAssigner(formjson.Nik, &userIdentity)
+
 		if errGenerateFromDukcapil != nil {
 			log.Println(errGenerateFromDukcapil)
 			response.WriteHeader(http.StatusBadRequest)
@@ -80,6 +98,12 @@ func AssignFakeIdentity(response http.ResponseWriter, request *http.Request) {
 			return
 		}
 		userIdentity.Foto = &fotostruct
+		errSave := userIdentity.Save()
+		if errSave != nil {
+			log.Println(errSave)
+			response.Write(writeResponseByte(errSave.Error(), userIdentity))
+			return
+		}
 
 	default:
 
@@ -88,14 +112,7 @@ func AssignFakeIdentity(response http.ResponseWriter, request *http.Request) {
 
 	}
 
-	errSave := userIdentity.Save()
-	if errSave != nil {
-		log.Println(errSave)
-		response.Write(writeResponseByte(errSave.Error(), userIdentity))
-		return
-	}
-
-	response.Write(writeResponseByte(message, userIdentity))
+	response.Write(writeResponseByte(message, data))
 }
 
 // GrepData grep Identity Data by user NIK
